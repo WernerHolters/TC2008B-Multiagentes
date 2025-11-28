@@ -32,7 +32,7 @@ public class PathFollower : MonoBehaviour
     private string GetPathFile()
     {
         // Mismo lugar donde está environment.json y path.json (un nivel arriba de Assets)
-        return Path.Combine(Application.dataPath, "../path.json");
+        return Path.Combine(Application.dataPath, "../../python/path.json");
     }
 
     public void LoadPath()

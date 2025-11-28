@@ -338,7 +338,7 @@ public class GridManager : MonoBehaviour
         }
 
         // Guardar
-        string envPath = Path.Combine(Application.dataPath, "../environment.json");
+        string envPath = Path.Combine(Application.dataPath, "../../python/environment.json");
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(envPath, json);
         Debug.Log("Environment exportado a: " + envPath);
