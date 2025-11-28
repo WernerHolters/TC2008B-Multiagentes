@@ -1,9 +1,16 @@
 import json
 import math
+import asyncio
 from heapq import heappush, heappop
+from spade.agent import Agent
+from spade.behaviour import OneShotBehaviour
+from dotenv import load_dotenv
+import os
 
-ENV_FILE = "C:\\Users\\Werner\\Documents\\code\\unity\\Aestrella\\environment.json"
-PATH_FILE = "C:\\Users\\Werner\\Documents\\code\\unity\\Aestrella\\path.json"
+load_dotenv()
+
+ENV_FILE = "environment.json"
+PATH_FILE = "path.json"
 
 def load_env(path):
     with open(path, "r") as f:
@@ -19,8 +26,8 @@ def save_path(path_cells, out_path):
 def neighbors(pos, env):
     x, y = pos
     moves = [
-        (1, 0), (-1, 0), (0, 1), (0, -1),      # 4 direcciones
-        (1, 1), (1, -1), (-1, 1), (-1, -1)     # diagonales
+        (1, 0), (-1, 0), (0, 1), (0, -1),
+        (1, 1), (1, -1), (-1, 1), (-1, -1)
     ]
 
     width = env["width"]
@@ -69,13 +76,70 @@ def astar(env):
 
     return None
 
-if __name__ == "__main__":
-    env = load_env(ENV_FILE)
-    path = astar(env)
 
-    if path is None:
-        print("No se encontró camino :(")
-    else:
-        print(f"Camino encontrado con {len(path)} pasos.")
-        save_path(path, PATH_FILE)
-        print(f"Ruta guardada en {PATH_FILE}")
+class PathfinderBehaviour(OneShotBehaviour):
+    """Comportamiento que ejecuta A* una vez"""
+    
+    async def run(self):
+        print(f"[{self.agent.name}] Iniciando búsqueda de camino...")
+        
+        # Cargar entorno
+        env = load_env(ENV_FILE)
+        print(f"[{self.agent.name}] Entorno cargado: {env['width']}x{env['height']}")
+        print(f"[{self.agent.name}] Inicio: ({env['start']['x']}, {env['start']['y']})")
+        print(f"[{self.agent.name}] Meta: ({env['goal']['x']}, {env['goal']['y']})")
+        print(f"[{self.agent.name}] Obstáculos: {len(env['obstacles'])}")
+        
+        # Ejecutar A*
+        path = astar(env)
+        
+        if path is None:
+            print(f"[{self.agent.name}] No se encontró camino :(")
+        else:
+            print(f"[{self.agent.name}] Camino encontrado con {len(path)} pasos.")
+            save_path(path, PATH_FILE)
+            print(f"[{self.agent.name}] Ruta guardada en {PATH_FILE}")
+            
+            # Mostrar el camino
+            print(f"[{self.agent.name}] Camino: {path[:5]}..." if len(path) > 5 else f"[{self.agent.name}] Camino: {path}")
+        
+        # Detener el agente
+        await self.agent.stop()
+
+
+class PathfinderAgent(Agent):
+    """Agente que encuentra caminos usando A*"""
+    
+    async def setup(self):
+        print(f"[{self.name}] Agente iniciado correctamente")
+        print(f"[{self.name}] JID: {self.jid}")
+        
+        # Agregar el comportamiento
+        behaviour = PathfinderBehaviour()
+        self.add_behaviour(behaviour)
+
+
+async def main():
+    """Función principal para ejecutar el agente"""
+    # Obtener credenciales del .env
+    jid = os.getenv("JID")
+    password = os.getenv("PASSWORD")
+    
+    if not jid or not password:
+        print("Error: JID o PASSWORD no encontrados en .env")
+        return
+    
+    # Crear y ejecutar el agente
+    agent = PathfinderAgent(jid, password)
+    await agent.start()
+    print("Agente PathfinderAgent iniciado. Presiona Ctrl+C para detener.")
+    
+    # Esperar a que el agente termine
+    while agent.is_alive():
+        await asyncio.sleep(1)
+    
+    print("Agente detenido.")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
