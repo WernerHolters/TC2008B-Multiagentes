@@ -9,8 +9,8 @@ import os
 
 load_dotenv()
 
-ENV_FILE = "environment.json"
-PATH_FILE = "path.json"
+ENV_FILE = "../unity/environment.json"
+PATH_FILE = "../unity/path.json"
 
 def load_env(path):
     with open(path, "r") as f:
