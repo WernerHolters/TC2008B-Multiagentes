@@ -14,6 +14,10 @@ ACTIONS = {
     1: (0, -1),  # down
     2: (-1, 0),  # left
     3: (1, 0),   # right
+    4: (-1, 1),  # up-left
+    5: (1, 1),   # up-right
+    6: (-1, -1), # down-left
+    7: (1, -1),  # down-right
 }
 
 ACTION_NAMES = {
@@ -21,6 +25,10 @@ ACTION_NAMES = {
     1: "down",
     2: "left",
     3: "right",
+    4: "up-left",
+    5: "up-right",
+    6: "down-left",
+    7: "down-right",
 }
 
 
@@ -55,7 +63,7 @@ def load_environment(path=None):
     return width, height, start, goal, obstacles
 
 
-def create_q_table(width, height, n_actions=4):
+def create_q_table(width, height, n_actions=8):
     # Q[x][y][a]
     return [[[0.0 for _ in range(n_actions)] for _ in range(height)]
             for _ in range(width)]
