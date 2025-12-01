@@ -2,6 +2,13 @@ import json
 import random
 from pathlib import Path
 
+# Base paths
+SCRIPT_DIR = Path(__file__).resolve().parent
+UNITY_DIR = SCRIPT_DIR.parent / "unity"
+ENV_FILE = UNITY_DIR / "environment.json"
+Q_TABLE_FILE = UNITY_DIR / "q_table.json"
+PATH_FILE = UNITY_DIR / "path_qlearning.json"
+
 ACTIONS = {
     0: (0, 1),   # up
     1: (0, -1),  # down
@@ -17,14 +24,34 @@ ACTION_NAMES = {
 }
 
 
-def load_environment(path: str = "../unity/environment.json"):
+def load_environment(path=None):
+    if path is None:
+        path = ENV_FILE
     with open(path, "r", encoding="utf-8") as f:
         env = json.load(f)
-    width = env["width"]
-    height = env["height"]
-    start = tuple(env["start"])
-    goal = tuple(env["goal"])
-    obstacles = {tuple(o) for o in env["obstacles"]}
+    width = int(env["width"])
+    height = int(env["height"])
+    
+    # Handle both list [x, y] and dict {"x": x, "y": y} formats
+    start_data = env["start"]
+    if isinstance(start_data, dict):
+        start = (int(start_data["x"]), int(start_data["y"]))
+    else:
+        start = tuple(int(x) for x in start_data)
+    
+    goal_data = env["goal"]
+    if isinstance(goal_data, dict):
+        goal = (int(goal_data["x"]), int(goal_data["y"]))
+    else:
+        goal = tuple(int(x) for x in goal_data)
+    
+    obstacles = set()
+    for o in env["obstacles"]:
+        if isinstance(o, dict):
+            obstacles.add((int(o["x"]), int(o["y"])))
+        else:
+            obstacles.add(tuple(int(x) for x in o))
+    
     return width, height, start, goal, obstacles
 
 
@@ -161,13 +188,15 @@ def greedy_path_from_q(q_table, start, goal, width, height, max_steps=200):
 
 
 def save_path(path, path_file="path_qlearning.json"):
-    serializable = [{"x": x, "y": y} for (x, y) in path]
+    data = {
+        "path": [{"x": x, "y": y} for (x, y) in path]
+    }
     with open(path_file, "w", encoding="utf-8") as f:
-        json.dump(serializable, f, indent=2)
+        json.dump(data, f, indent=2)
 
 
 def main():
-    width, height, start, goal, obstacles = load_environment("environment.json")
+    width, height, start, goal, obstacles = load_environment()
 
     q_table = train_q_learning(
         width,
@@ -183,11 +212,11 @@ def main():
         epsilon_end=0.05,
     )
 
-    save_q_table(q_table, "q_table.json")
+    save_q_table(q_table, Q_TABLE_FILE)
 
     # para modo "Run Policy": generas una ruta greedy y Unity la anima
     path = greedy_path_from_q(q_table, start, goal, width, height, max_steps=200)
-    save_path(path, "path_qlearning.json")
+    save_path(path, PATH_FILE)
 
 
 if __name__ == "__main__":

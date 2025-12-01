@@ -63,6 +63,7 @@ public class PathFollower : MonoBehaviour
     {
         StopSimulation();
         currentPathFile = "path.json";
+        Debug.Log($"Switching to A* (file: {currentPathFile})");
         LoadPath();
     }
 
@@ -71,6 +72,7 @@ public class PathFollower : MonoBehaviour
     {
         StopSimulation();
         currentPathFile = "path_qlearning.json";
+        Debug.Log($"Switching to Q-Learning (file: {currentPathFile})");
         LoadPath();
     }
 
@@ -108,6 +110,9 @@ public class PathFollower : MonoBehaviour
             LoadPath();
             if (path == null || path.Count == 0) return;
         }
+
+        string algorithm = currentPathFile == "path.json" ? "A*" : "Q-Learning";
+        Debug.Log($"Starting simulation with {algorithm} using file: {currentPathFile} ({path.Count} steps)");
 
         currentIndex = 0;
         transform.position = GridToWorld(path[0]);
