@@ -17,22 +17,16 @@ public class PathFollower : MonoBehaviour
     private int currentIndex = 0;
     private bool isPlaying = false;
     private float timer = 0f;
+    private string currentPathFile = "path.json";  // Por defecto A*
 
     private void Start()
     {
-        LoadPath();
-
-        // Colocar al agente en la primera celda si hay path
-        if (path != null && path.Count > 0)
-        {
-            transform.position = GridToWorld(path[0]);
-        }
+        // No cargar automáticamente, esperar a que el usuario elija algoritmo
     }
 
     private string GetPathFile()
     {
-        // Mismo lugar donde está environment.json y path.json (un nivel arriba de Assets)
-        return Path.Combine(Application.dataPath, "../path.json");
+        return Path.Combine(Application.dataPath, "../" + currentPathFile);
     }
 
     public void LoadPath()
@@ -40,7 +34,7 @@ public class PathFollower : MonoBehaviour
         string fullPath = GetPathFile();
         if (!File.Exists(fullPath))
         {
-            Debug.LogError("No se encontró path.json en: " + fullPath);
+            Debug.LogError($"Path file not found: {fullPath}");
             return;
         }
 
@@ -49,13 +43,35 @@ public class PathFollower : MonoBehaviour
 
         if (data == null || data.path == null || data.path.Count == 0)
         {
-            Debug.LogError("path.json vacío o mal formado.");
+            Debug.LogError($"Path file is empty or malformed: {fullPath}");
             return;
         }
 
         path = data.path;
         currentIndex = 0;
-        Debug.Log("Ruta cargada con " + path.Count + " pasos.");
+        Debug.Log($"Path loaded with {path.Count} steps from {currentPathFile}");
+
+        // Colocar al agente en la posición inicial
+        if (path.Count > 0)
+        {
+            transform.position = GridToWorld(path[0]);
+        }
+    }
+
+    // Llamar desde el botón "A Star"
+    public void UseAStar()
+    {
+        StopSimulation();
+        currentPathFile = "path.json";
+        LoadPath();
+    }
+
+    // Llamar desde el botón "Q Learning"
+    public void UseQLearning()
+    {
+        StopSimulation();
+        currentPathFile = "path_qlearning.json";
+        LoadPath();
     }
 
     private Vector3 GridToWorld(Coordenadas c)
