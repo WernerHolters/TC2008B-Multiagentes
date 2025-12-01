@@ -276,29 +276,23 @@ public class GridManager : MonoBehaviour
         }
 
         // Cargar start
-        if (data.start != null)
+        string startKey = GetKey(data.start.x, data.start.y);
+        if (tiles.TryGetValue(startKey, out Tile startTileLoaded))
         {
-            string startKey = GetKey(data.start.x, data.start.y);
-            if (tiles.TryGetValue(startKey, out Tile startTileLoaded))
-            {
-                startTile = startTileLoaded;
-                StartCoordinate = data.start;
-                startTileLoaded.SetStart(true);
-                Debug.Log($"Start cargado en: ({data.start.x},{data.start.y})");
-            }
+            startTile = startTileLoaded;
+            StartCoordinate = data.start;
+            startTileLoaded.SetStart(true);
+            Debug.Log($"Start cargado en: ({data.start.x},{data.start.y})");
         }
 
         // Cargar goal
-        if (data.goal != null)
+        string goalKey = GetKey(data.goal.x, data.goal.y);
+        if (tiles.TryGetValue(goalKey, out Tile goalTileLoaded))
         {
-            string goalKey = GetKey(data.goal.x, data.goal.y);
-            if (tiles.TryGetValue(goalKey, out Tile goalTileLoaded))
-            {
-                goalTile = goalTileLoaded;
-                GoalCoordinate = data.goal;
-                goalTileLoaded.SetGoal(true);
-                Debug.Log($"Goal cargado en: ({data.goal.x},{data.goal.y})");
-            }
+            goalTile = goalTileLoaded;
+            GoalCoordinate = data.goal;
+            goalTileLoaded.SetGoal(true);
+            Debug.Log($"Goal cargado en: ({data.goal.x},{data.goal.y})");
         }
 
         // Cargar obstáculos
@@ -353,7 +347,7 @@ public class GridManager : MonoBehaviour
         }
     }
     
-    // Para Python
+    // Para Python export
     public void ExportEnvironmentForPython()
     {
         EnvironmentData data = new EnvironmentData();
