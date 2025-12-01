@@ -1,6 +1,15 @@
 import json
 import random
+import asyncio
 from pathlib import Path
+from spade.agent import Agent
+from spade.behaviour import OneShotBehaviour
+from spade.message import Message
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Base paths
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -203,29 +212,75 @@ def save_path(path, path_file="path_qlearning.json"):
         json.dump(data, f, indent=2)
 
 
-def main():
-    width, height, start, goal, obstacles = load_environment()
+class QLearningBehaviour(OneShotBehaviour):
+    async def run(self):
+        print("Q-Learning Agent iniciando entrenamiento...")
+        
+        # Load environment
+        width, height, start, goal, obstacles = load_environment()
+        
+        # Train Q-learning
+        q_table = train_q_learning(
+            width,
+            height,
+            start,
+            goal,
+            obstacles,
+            episodes=2000,
+            max_steps=200,
+            alpha=0.1,
+            gamma=0.9,
+            epsilon_start=0.3,
+            epsilon_end=0.05,
+        )
+        
+        # Save results
+        save_q_table(q_table, Q_TABLE_FILE)
+        path = greedy_path_from_q(q_table, start, goal, width, height, max_steps=200)
+        save_path(path, PATH_FILE)
+        
+        print(f"Entrenamiento completado. Ruta guardada con {len(path)} pasos.")
+        print(f"Q-table: {Q_TABLE_FILE}")
+        print(f"Path: {PATH_FILE}")
+        
+        # Send completion message to Unity (if needed)
+        msg = Message(to="unity@localhost")
+        msg.body = f"Training completed. Path length: {len(path)}"
+        await self.send(msg)
 
-    q_table = train_q_learning(
-        width,
-        height,
-        start,
-        goal,
-        obstacles,
-        episodes=2000,
-        max_steps=200,
-        alpha=0.1,
-        gamma=0.9,
-        epsilon_start=0.3,
-        epsilon_end=0.05,
-    )
 
-    save_q_table(q_table, Q_TABLE_FILE)
+class QLearningAgent(Agent):
+    async def setup(self):
+        print(f"Agente Q-Learning iniciado: {self.jid}")
+        behaviour = QLearningBehaviour()
+        self.add_behaviour(behaviour)
 
-    # para modo "Run Policy": generas una ruta greedy y Unity la anima
-    path = greedy_path_from_q(q_table, start, goal, width, height, max_steps=200)
-    save_path(path, PATH_FILE)
+
+async def main():
+    # Get credentials from environment
+    jid = os.getenv("JID")
+    password = os.getenv("PASSWORD")
+    
+    if not jid or not password:
+        print("Error: JID y PASSWORD deben estar definidos en .env")
+        return
+    
+    # Create and start agent
+    agent = QLearningAgent(jid, password)
+    
+    try:
+        await agent.start()
+        print("Presiona Ctrl+C para detener el agente...")
+        
+        # Keep the agent running
+        while agent.is_alive():
+            await asyncio.sleep(1)
+            
+    except KeyboardInterrupt:
+        print("\nDeteniendo agente...")
+    finally:
+        await agent.stop()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
