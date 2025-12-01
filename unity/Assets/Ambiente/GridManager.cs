@@ -251,36 +251,64 @@ public class GridManager : MonoBehaviour
 
     public void LoadObstacles()
     {
-        if (!File.Exists(savePath))
+        // Cargar desde environment.json que tiene start, goal y obstacles
+        string envPath = Path.Combine(Application.dataPath, "../environment.json");
+        
+        if (!File.Exists(envPath))
         {
-            Debug.LogWarning("No se encontró archivo de obstáculos para cargar.");
+            Debug.LogWarning("No se encontró environment.json para cargar.");
             return;
         }
 
-        string json = File.ReadAllText(savePath);
-        ObstaclesData data = JsonUtility.FromJson<ObstaclesData>(json);
+        string json = File.ReadAllText(envPath);
+        EnvironmentData data = JsonUtility.FromJson<EnvironmentData>(json);
 
-        // Limpia obstáculos actuales
+        // Limpiar obstáculos, start y goal actuales
         foreach (var kvp in tiles)
         {
             Tile tile = kvp.Value;
             if (tile != null)
             {
                 tile.SetObstacle(false);
+                tile.SetStart(false);
+                tile.SetGoal(false);
             }
         }
 
-        // Marca los del archivo
-        foreach (var coord in data.obstacles)
+        // Cargar start
+        string startKey = GetKey(data.start.x, data.start.y);
+        if (tiles.TryGetValue(startKey, out Tile startTileLoaded))
         {
-            string key = GetKey(coord.x, coord.y);
-            if (tiles.TryGetValue(key, out Tile tile))
+            startTile = startTileLoaded;
+            StartCoordinate = data.start;
+            startTileLoaded.SetStart(true);
+            Debug.Log($"Start cargado en: ({data.start.x},{data.start.y})");
+        }
+
+        // Cargar goal
+        string goalKey = GetKey(data.goal.x, data.goal.y);
+        if (tiles.TryGetValue(goalKey, out Tile goalTileLoaded))
+        {
+            goalTile = goalTileLoaded;
+            GoalCoordinate = data.goal;
+            goalTileLoaded.SetGoal(true);
+            Debug.Log($"Goal cargado en: ({data.goal.x},{data.goal.y})");
+        }
+
+        // Cargar obstáculos
+        if (data.obstacles != null)
+        {
+            foreach (var coord in data.obstacles)
             {
-                tile.SetObstacle(true);
+                string key = GetKey(coord.x, coord.y);
+                if (tiles.TryGetValue(key, out Tile tile))
+                {
+                    tile.SetObstacle(true);
+                }
             }
         }
 
-        Debug.Log("Obstáculos cargados desde archivo.");
+        Debug.Log("Environment cargado: start, goal y obstáculos.");
     }
 
     private void Update()
@@ -319,7 +347,7 @@ public class GridManager : MonoBehaviour
         }
     }
     
-    // Para Python
+    // Para Python export
     public void ExportEnvironmentForPython()
     {
         EnvironmentData data = new EnvironmentData();
