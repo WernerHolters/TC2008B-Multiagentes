@@ -8,7 +8,7 @@ public class PathFollower : MonoBehaviour
     [Serializable]
     public class PathData
     {
-        public List<Coordenadas> path;   // usa tu struct Coordenadas (x, y)
+        public List<Coordenadas> path;
     }
 
     public float stepTime = 0.3f;   // Tiempo entre pasos
@@ -84,7 +84,6 @@ public class PathFollower : MonoBehaviour
 
         float tileSize = gm.TileSize;
 
-        // Misma fórmula que SpawnGrid, pero levantando un poco la esfera
         return new Vector3(c.x * tileSize, 0.5f, c.y * tileSize);
     }
 
