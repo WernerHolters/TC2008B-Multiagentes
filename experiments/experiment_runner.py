@@ -24,16 +24,15 @@ from heapq import heappush, heappop
 # === A* ALGORITHM FUNCTIONS ===
 
 def heuristic(a, b):
-    """Euclidean distance heuristic"""
+    """Manhattan distance heuristic (for 4-neighbor movement)"""
     (x1, y1), (x2, y2) = a, b
-    return math.hypot(x1 - x2, y1 - y2)
+    return abs(x1 - x2) + abs(y1 - y2)
 
 def neighbors(pos, env):
-    """Get valid neighbors for A*"""
+    """Get valid neighbors for A* (4-neighbor movement)"""
     x, y = pos
     moves = [
-        (1, 0), (-1, 0), (0, 1), (0, -1),
-        (1, 1), (1, -1), (-1, 1), (-1, -1)
+        (1, 0), (-1, 0), (0, 1), (0, -1)  # Only orthogonal moves
     ]
 
     width = env["width"]
@@ -43,7 +42,7 @@ def neighbors(pos, env):
     for dx, dy in moves:
         nx, ny = x + dx, y + dy
         if 0 <= nx < width and 0 <= ny < height and (nx, ny) not in obstacles:
-            cost = math.sqrt(2) if dx != 0 and dy != 0 else 1.0
+            cost = 1.0  # All moves have cost 1 (no diagonals)
             yield (nx, ny), cost
 
 def astar(env):
