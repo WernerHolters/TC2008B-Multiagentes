@@ -24,15 +24,16 @@ from heapq import heappush, heappop
 # === A* ALGORITHM FUNCTIONS ===
 
 def heuristic(a, b):
-    """Manhattan distance heuristic (for 4-neighbor movement)"""
+    """Euclidean distance heuristic (for 8-neighbor movement)"""
     (x1, y1), (x2, y2) = a, b
-    return abs(x1 - x2) + abs(y1 - y2)
+    return math.hypot(x1 - x2, y1 - y2)
 
 def neighbors(pos, env):
-    """Get valid neighbors for A* (4-neighbor movement)"""
+    """Get valid neighbors for A* (8-neighbor movement)"""
     x, y = pos
     moves = [
-        (1, 0), (-1, 0), (0, 1), (0, -1)  # Only orthogonal moves
+        (1, 0), (-1, 0), (0, 1), (0, -1),     # Orthogonal moves
+        (1, 1), (1, -1), (-1, 1), (-1, -1)    # Diagonal moves
     ]
 
     width = env["width"]
@@ -42,7 +43,7 @@ def neighbors(pos, env):
     for dx, dy in moves:
         nx, ny = x + dx, y + dy
         if 0 <= nx < width and 0 <= ny < height and (nx, ny) not in obstacles:
-            cost = 1.0  # All moves have cost 1 (no diagonals)
+            cost = math.sqrt(2) if dx != 0 and dy != 0 else 1.0
             yield (nx, ny), cost
 
 def astar(env):
@@ -85,9 +86,13 @@ ACTIONS = {
     1: (0, -1),  # down
     2: (-1, 0),  # left
     3: (1, 0),   # right
+    4: (1, 1),   # up-right (diagonal)
+    5: (1, -1),  # down-right (diagonal)
+    6: (-1, 1),  # up-left (diagonal)
+    7: (-1, -1), # down-left (diagonal)
 }
 
-def create_q_table(width, height, n_actions=4):
+def create_q_table(width, height, n_actions=8):
     """Initialize Q-table with zeros"""
     return [[[0.0 for _ in range(n_actions)] for _ in range(height)]
             for _ in range(width)]
@@ -119,7 +124,9 @@ def step(state, action, width, height, goal, obstacles):
             reward = 10
             done = True
         else:
-            reward = -1
+            # Different cost for diagonal vs orthogonal moves
+            move_cost = math.sqrt(2) if dx != 0 and dy != 0 else 1.0
+            reward = -move_cost
             done = False
 
     return next_state, reward, done

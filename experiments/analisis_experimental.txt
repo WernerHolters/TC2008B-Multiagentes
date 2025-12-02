@@ -4,84 +4,84 @@ COMPARACIÓN EXPERIMENTAL: A* vs Q-LEARNING
 
 RESUMEN DEL EXPERIMENTO
 ----------------------------------------
-Total de experimentos: 431
+Total de experimentos: 432
 Ejecuciones A*: 216
-Ejecuciones Q-Learning: 215
+Ejecuciones Q-Learning: 216
 
 TASAS DE ÉXITO
 ----------------------------------------
-A*: 201/216 (93.1%)
-Q-Learning: 201/215 (93.5%)
+A*: 216/216 (100.0%)
+Q-Learning: 216/216 (100.0%)
 
 RENDIMIENTO POR DENSIDAD DE OBSTÁCULOS
 ----------------------------------------
 
 Densidad 0.0:
   Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 12.0, Q-Learning: 12.0
-  Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.081s
+  Longitud Promedio - A*: 6.6, Q-Learning: 6.7
+  Diferencia de Pasos: +0.2 pasos (Q-Learning vs A*)
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.053s
 
 Densidad 0.1:
   Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 12.0, Q-Learning: 12.0
-  Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.080s
+  Longitud Promedio - A*: 6.9, Q-Learning: 7.0
+  Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.054s
 
 Densidad 0.2:
-  Tasa de Éxito - A*: 92.6%, Q-Learning: 94.3%
-  Longitud Promedio - A*: 12.1, Q-Learning: 12.1
+  Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
+  Longitud Promedio - A*: 7.3, Q-Learning: 7.3
   Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.131s
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.055s
 
 Densidad 0.3:
-  Tasa de Éxito - A*: 79.6%, Q-Learning: 79.6%
-  Longitud Promedio - A*: 11.6, Q-Learning: 11.6
-  Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.256s
+  Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
+  Longitud Promedio - A*: 7.9, Q-Learning: 7.9
+  Diferencia de Pasos: -0.0 pasos (Q-Learning vs A*)
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.070s
 
 RENDIMIENTO POR DISTANCIA INICIO-META
 ----------------------------------------
 
 Distancia Cercana:
-  Tasa de Éxito - A*: 98.6%, Q-Learning: 98.6%
-  Longitud Promedio - A*: 5.1, Q-Learning: 5.1
+  Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
+  Longitud Promedio - A*: 3.2, Q-Learning: 3.2
   Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
 
 Distancia Media:
-  Tasa de Éxito - A*: 91.7%, Q-Learning: 93.0%
-  Longitud Promedio - A*: 12.5, Q-Learning: 12.5
-  Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
+  Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
+  Longitud Promedio - A*: 7.4, Q-Learning: 7.5
+  Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
 
 Distancia Lejana:
-  Tasa de Éxito - A*: 88.9%, Q-Learning: 88.9%
-  Longitud Promedio - A*: 18.9, Q-Learning: 18.9
-  Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
+  Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
+  Longitud Promedio - A*: 10.8, Q-Learning: 11.0
+  Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
 
 RENDIMIENTO POR TASA DE APRENDIZAJE (alpha)
 ----------------------------------------
 
 alpha = 0.1:
-  Tasa de Éxito Q-Learning: 94.4%
-  Longitud Promedio Q-Learning: 11.9
-  Tiempo Promedio Q-Learning: 0.133s
+  Tasa de Éxito Q-Learning: 100.0%
+  Longitud Promedio Q-Learning: 7.1
+  Tiempo Promedio Q-Learning: 0.059s
 
 alpha = 0.3:
-  Tasa de Éxito Q-Learning: 92.6%
-  Longitud Promedio Q-Learning: 12.0
-  Tiempo Promedio Q-Learning: 0.142s
+  Tasa de Éxito Q-Learning: 100.0%
+  Longitud Promedio Q-Learning: 7.3
+  Tiempo Promedio Q-Learning: 0.057s
 
 HALLAZGOS PRINCIPALES
 ----------------------------------------
 Mejor rendimiento Q-Learning:
   Configuración: d0.0_distclose_a0.1_g0.9_rbasic
-  Longitud del camino: 5 pasos
-  Tiempo: 0.034s
+  Longitud del camino: 3 pasos
+  Tiempo: 0.017s
 
 Peor rendimiento Q-Learning:
   Configuración: d0.3_distfar_a0.3_g0.95_rbasic
-  Longitud del camino: 25 pasos
-  Tiempo: 0.196s
+  Longitud del camino: 14 pasos
+  Tiempo: 0.105s
 
 RECOMENDACIONES
 ----------------------------------------
