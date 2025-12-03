@@ -1,16 +1,22 @@
 import json
 import math
 import asyncio
+from pathlib import Path
 from heapq import heappush, heappop
 from spade.agent import Agent
 from spade.behaviour import OneShotBehaviour
 from dotenv import load_dotenv
 import os
 
+# Load environment variables
 load_dotenv()
 
-ENV_FILE = "../unity/environment.json"
-PATH_FILE = "../unity/path.json"
+# Base paths
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
+UNITY_DIR = PROJECT_ROOT / "unity"
+ENV_FILE = UNITY_DIR / "environment.json"
+PATH_FILE = UNITY_DIR / "path.json"
 
 def load_env(path):
     with open(path, "r") as f:

@@ -13,7 +13,8 @@ load_dotenv()
 
 # Base paths
 SCRIPT_DIR = Path(__file__).resolve().parent
-UNITY_DIR = SCRIPT_DIR.parent / "unity"
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
+UNITY_DIR = PROJECT_ROOT / "unity"
 ENV_FILE = UNITY_DIR / "environment.json"
 Q_TABLE_FILE = UNITY_DIR / "q_table.json"
 PATH_FILE = UNITY_DIR / "path_qlearning.json"
