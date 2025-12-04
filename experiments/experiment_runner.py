@@ -16,9 +16,11 @@ import time
 import math
 import random
 import statistics
+import psutil
+import os
 from pathlib import Path
 from dataclasses import dataclass, asdict
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 from heapq import heappush, heappop
 
 # === A* ALGORITHM FUNCTIONS ===
@@ -79,6 +81,79 @@ def astar(env):
 
     return None
 
+# === REACTIVE AGENT ALGORITHM FUNCTIONS ===
+
+def reactive_agent(env, max_steps=200):
+    """Simple reactive agent that moves towards goal using basic rules"""
+    start = (env["start"]["x"], env["start"]["y"])
+    goal = (env["goal"]["x"], env["goal"]["y"])
+    width = env["width"]
+    height = env["height"]
+    obstacles = {(o["x"], o["y"]) for o in env["obstacles"]}
+    
+    path = [start]
+    current = start
+    
+    for _ in range(max_steps):
+        if current == goal:
+            return path
+        
+        x, y = current
+        gx, gy = goal
+        
+        # Reactive rules: move towards goal using simple heuristics
+        # Priority: reduce largest distance dimension first
+        dx = gx - x
+        dy = gy - y
+        
+        # Determine next move based on reactive rules
+        next_moves = []
+        
+        # Primary rule: move in direction of largest distance
+        if abs(dx) > abs(dy):
+            # Move horizontally
+            if dx > 0:
+                next_moves.append((x + 1, y))  # right
+            elif dx < 0:
+                next_moves.append((x - 1, y))  # left
+        elif abs(dy) > 0:
+            # Move vertically
+            if dy > 0:
+                next_moves.append((x, y + 1))  # up
+            elif dy < 0:
+                next_moves.append((x, y - 1))  # down
+        
+        # Secondary rule: try diagonal if available
+        if dx != 0 and dy != 0:
+            diag_x = x + (1 if dx > 0 else -1)
+            diag_y = y + (1 if dy > 0 else -1)
+            next_moves.append((diag_x, diag_y))
+        
+        # Fallback rule: try any valid adjacent cell
+        for nx, ny in [(x+1,y), (x-1,y), (x,y+1), (x,y-1), 
+                       (x+1,y+1), (x+1,y-1), (x-1,y+1), (x-1,y-1)]:
+            if (nx, ny) not in next_moves:
+                next_moves.append((nx, ny))
+        
+        # Find first valid move
+        moved = False
+        for next_pos in next_moves:
+            nx, ny = next_pos
+            # Check if valid move
+            if (0 <= nx < width and 0 <= ny < height and 
+                next_pos not in obstacles and next_pos not in path):
+                current = next_pos
+                path.append(current)
+                moved = True
+                break
+        
+        if not moved:
+            # Stuck - no valid moves
+            return None
+    
+    # Max steps exceeded
+    return None if current != goal else path
+
 # === Q-LEARNING ALGORITHM FUNCTIONS ===
 
 ACTIONS = {
@@ -133,12 +208,20 @@ def step(state, action, width, height, goal, obstacles):
 
 def train_q_learning(width, height, start, goal, obstacles, episodes=2000, max_steps=200,
                     alpha=0.1, gamma=0.9, epsilon_start=0.3, epsilon_end=0.05):
-    """Train Q-learning agent"""
+    """Train Q-learning agent with convergence metrics"""
     q_table = create_q_table(width, height)
     epsilon = epsilon_start
+    
+    # Tracking metrics
+    convergence_window = []
+    q_value_history = []
+    episodes_to_converge = episodes
+    successful_episodes = 0
 
     for ep in range(episodes):
         state = start
+        episode_reward = 0
+        
         for _ in range(max_steps):
             x, y = state
             action = epsilon_greedy(q_table[x][y], epsilon)
@@ -151,14 +234,41 @@ def train_q_learning(width, height, start, goal, obstacles, episodes=2000, max_s
             q_old = q_table[x][y][action]
             q_table[x][y][action] = q_old + alpha * (reward + gamma * max_next - q_old)
 
+            episode_reward += reward
             state = next_state
             if done:
+                successful_episodes += 1
                 break
+        
+        # Track convergence
+        convergence_window.append(episode_reward)
+        if len(convergence_window) > 100:
+            convergence_window.pop(0)
+            
+            # Check for convergence (stable reward over last 50 episodes)
+            if ep > 500 and len(set([int(r) for r in convergence_window[-50:]])) < 3:
+                episodes_to_converge = min(episodes_to_converge, ep)
+        
+        # Track max Q-value evolution
+        max_q = max(max(q_state) for row in q_table for q_state in row)
+        q_value_history.append(max_q)
 
         # Decay epsilon
         epsilon = max(epsilon_end, epsilon_start - (epsilon_start - epsilon_end) * (ep / episodes))
+    
+    # Calculate convergence stability (variance of Q-values in last 100 episodes)
+    convergence_stability = 0.0
+    if len(q_value_history) > 100:
+        recent_q_values = q_value_history[-100:]
+        mean_q = statistics.mean(recent_q_values)
+        if mean_q > 0:
+            variance = statistics.variance(recent_q_values)
+            convergence_stability = 1.0 / (1.0 + variance)  # Higher is more stable
+    
+    # Calculate exploration efficiency
+    exploration_efficiency = successful_episodes / episodes if episodes > 0 else 0.0
 
-    return q_table
+    return q_table, episodes_to_converge, max(q_value_history) if q_value_history else 0.0, convergence_stability, exploration_efficiency
 
 def greedy_path_from_q(q_table, start, goal, width, height, max_steps=200):
     """Extract greedy path from trained Q-table"""
@@ -208,7 +318,7 @@ class ExperimentConfig:
 
 @dataclass
 class ExperimentResult:
-    """Results from a single experiment run"""
+    """Results from a single experiment run with extended metrics"""
     config_id: str
     algorithm: str          # "astar" or "qlearning"
     run_number: int
@@ -218,12 +328,21 @@ class ExperimentResult:
     path_length: int        # steps in final path
     success: bool           # reached goal?
     
+    # Memory and efficiency metrics
+    memory_usage: float = 0.0          # MB de memoria utilizada
+    path_optimality: float = 0.0       # ratio vs optimal path length
+    
     # Q-Learning specific
     episodes_to_converge: int = None  # episodes until stable policy
     final_q_max: float = None         # max Q-value at end
+    convergence_stability: float = None  # estabilidad del aprendizaje
+    exploration_efficiency: float = None # eficiencia de exploración
     
     # A* specific
     nodes_explored: int = None        # search space explored
+    
+    # Additional analysis metrics
+    path_smoothness: float = None      # suavidad del camino (cambios de dirección)
 
 class ExperimentRunner:
     def __init__(self, base_dir: Path):
@@ -262,6 +381,29 @@ class ExperimentRunner:
         """Calculate Euclidean distance between start and goal"""
         return math.sqrt((start[0] - goal[0])**2 + (start[1] - goal[1])**2)
     
+    def calculate_path_smoothness(self, path: List[Tuple[int, int]]) -> float:
+        """Calculate path smoothness (fewer direction changes = smoother)"""
+        if not path or len(path) < 3:
+            return 1.0
+        
+        direction_changes = 0
+        for i in range(1, len(path) - 1):
+            prev_dir = (path[i][0] - path[i-1][0], path[i][1] - path[i-1][1])
+            next_dir = (path[i+1][0] - path[i][0], path[i+1][1] - path[i][1])
+            
+            if prev_dir != next_dir:
+                direction_changes += 1
+        
+        # Normalize: 1.0 = perfectly smooth, 0.0 = many changes
+        max_changes = len(path) - 2
+        smoothness = 1.0 - (direction_changes / max_changes) if max_changes > 0 else 1.0
+        return smoothness
+    
+    def calculate_optimal_path_length(self, env: Dict[str, Any]) -> int:
+        """Calculate optimal path length using A*"""
+        optimal_path = astar(env)
+        return len(optimal_path) if optimal_path else float('inf')
+    
     def generate_start_goal_pairs(self, grid_size: int) -> List[Tuple[Tuple[int, int], Tuple[int, int], str]]:
         """Generate start-goal pairs for different distance categories"""
         pairs = []
@@ -289,8 +431,41 @@ class ExperimentRunner:
         
         return pairs
     
-    def run_astar_experiment(self, env: Dict[str, Any]) -> Tuple[List[Tuple[int, int]], float, int]:
-        """Run A* algorithm and return path, time, nodes explored"""
+    def run_reactive_experiment(self, env: Dict[str, Any]) -> Tuple[Optional[List[Tuple[int, int]]], float, float, float, float]:
+        """Run reactive agent and return path, time, memory, optimality, smoothness"""
+        # Measure memory before
+        process = psutil.Process(os.getpid())
+        memory_before = process.memory_info().rss / 1024 / 1024  # MB
+        
+        start_time = time.time()
+        
+        # Run reactive agent
+        path = reactive_agent(env, max_steps=200)
+        
+        execution_time = time.time() - start_time
+        
+        # Measure memory after
+        memory_after = process.memory_info().rss / 1024 / 1024
+        memory_usage = memory_after - memory_before
+        
+        # Calculate metrics
+        optimal_length = self.calculate_optimal_path_length(env)
+        if path and len(path) > 0 and optimal_length != float('inf'):
+            path_optimality = optimal_length / len(path)
+        else:
+            path_optimality = 0.0
+        
+        # Calculate path smoothness
+        path_smoothness = self.calculate_path_smoothness(path) if path else 0.0
+        
+        return path, execution_time, memory_usage, path_optimality, path_smoothness
+    
+    def run_astar_experiment(self, env: Dict[str, Any]) -> Tuple[Optional[List[Tuple[int, int]]], float, int, float, float, float]:
+        """Run A* algorithm and return path, time, nodes explored, memory, optimality, smoothness"""
+        # Measure memory before
+        process = psutil.Process(os.getpid())
+        memory_before = process.memory_info().rss / 1024 / 1024  # MB
+        
         start_time = time.time()
         
         # Convert to format expected by A*
@@ -309,13 +484,27 @@ class ExperimentRunner:
         path = astar(env_for_astar)
         execution_time = time.time() - start_time
         
-        # For simplicity, nodes explored = path length (A* explores optimally)
+        # Measure memory after
+        memory_after = process.memory_info().rss / 1024 / 1024
+        memory_usage = memory_after - memory_before
+        
+        # Calculate metrics
         nodes_explored = len(path) if path else 0
         
-        return path, execution_time, nodes_explored
+        # A* is optimal by definition, so optimality = 1.0
+        path_optimality = 1.0 if path else 0.0
+        
+        # Calculate path smoothness
+        path_smoothness = self.calculate_path_smoothness(path) if path else 0.0
+        
+        return path, execution_time, nodes_explored, memory_usage, path_optimality, path_smoothness
     
-    def run_qlearning_experiment(self, env: Dict[str, Any], config: ExperimentConfig) -> Tuple[List[Tuple[int, int]], float, int, float]:
-        """Run Q-Learning algorithm and return path, time, episodes to converge, max Q"""
+    def run_qlearning_experiment(self, env: Dict[str, Any], config: ExperimentConfig) -> Tuple[Optional[List[Tuple[int, int]]], float, int, float, float, float, float, float, float]:
+        """Run Q-Learning algorithm and return path, time, metrics"""
+        # Measure memory before
+        process = psutil.Process(os.getpid())
+        memory_before = process.memory_info().rss / 1024 / 1024  # MB
+        
         start_time = time.time()
         
         width = env["width"]
@@ -324,8 +513,8 @@ class ExperimentRunner:
         goal = (env["goal"]["x"], env["goal"]["y"])
         obstacles = {(o["x"], o["y"]) for o in env["obstacles"]}
         
-        # Train Q-Learning
-        q_table = train_q_learning(
+        # Train Q-Learning with metrics
+        q_table, episodes_to_converge, max_q, convergence_stability, exploration_efficiency = train_q_learning(
             width, height, start, goal, obstacles,
             episodes=config.episodes,
             max_steps=config.max_steps,
@@ -339,13 +528,21 @@ class ExperimentRunner:
         path = greedy_path_from_q(q_table, start, goal, width, height, config.max_steps)
         execution_time = time.time() - start_time
         
-        # Calculate episodes to converge (simplified: 75% of total episodes)
-        episodes_to_converge = int(config.episodes * 0.75)
+        # Measure memory after
+        memory_after = process.memory_info().rss / 1024 / 1024
+        memory_usage = memory_after - memory_before
         
-        # Calculate max Q-value
-        max_q = max(max(q_state) for row in q_table for q_state in row)
+        # Calculate path optimality (compare to A* optimal)
+        optimal_length = self.calculate_optimal_path_length(env)
+        if path and len(path) > 0 and optimal_length != float('inf'):
+            path_optimality = optimal_length / len(path)
+        else:
+            path_optimality = 0.0
         
-        return path, execution_time, episodes_to_converge, max_q
+        # Calculate path smoothness
+        path_smoothness = self.calculate_path_smoothness(path) if path else 0.0
+        
+        return path, execution_time, episodes_to_converge, max_q, convergence_stability, exploration_efficiency, memory_usage, path_optimality, path_smoothness
     
     def run_single_experiment(self, config: ExperimentConfig, run_number: int) -> List[ExperimentResult]:
         """Run both algorithms on the same environment configuration"""
@@ -357,9 +554,28 @@ class ExperimentRunner:
         
         results = []
         
+        # Run Reactive Agent
+        try:
+            reactive_path, reactive_time, reactive_memory, reactive_optimality, reactive_smoothness = self.run_reactive_experiment(env)
+            reactive_result = ExperimentResult(
+                config_id=config_id,
+                algorithm="reactive",
+                run_number=run_number,
+                execution_time=reactive_time,
+                path_length=len(reactive_path) if reactive_path else 0,
+                success=reactive_path is not None and reactive_path[-1] == (env["goal"]["x"], env["goal"]["y"]) if reactive_path else False,
+                memory_usage=reactive_memory,
+                path_optimality=reactive_optimality,
+                path_smoothness=reactive_smoothness
+            )
+            results.append(reactive_result)
+            print(f"  Reactive completed: {len(reactive_path) if reactive_path else 0} steps, {reactive_time:.3f}s, {reactive_memory:.2f}MB")
+        except Exception as e:
+            print(f"  Reactive failed: {e}")
+        
         # Run A*
         try:
-            astar_path, astar_time, nodes_explored = self.run_astar_experiment(env)
+            astar_path, astar_time, nodes_explored, astar_memory, astar_optimality, astar_smoothness = self.run_astar_experiment(env)
             astar_result = ExperimentResult(
                 config_id=config_id,
                 algorithm="astar",
@@ -367,16 +583,19 @@ class ExperimentRunner:
                 execution_time=astar_time,
                 path_length=len(astar_path) if astar_path else 0,
                 success=astar_path is not None,
-                nodes_explored=nodes_explored
+                nodes_explored=nodes_explored,
+                memory_usage=astar_memory,
+                path_optimality=astar_optimality,
+                path_smoothness=astar_smoothness
             )
             results.append(astar_result)
-            print(f"  A* completed: {len(astar_path) if astar_path else 0} steps, {astar_time:.3f}s")
+            print(f"  A* completed: {len(astar_path) if astar_path else 0} steps, {astar_time:.3f}s, {astar_memory:.2f}MB")
         except Exception as e:
             print(f"  A* failed: {e}")
         
         # Run Q-Learning
         try:
-            ql_path, ql_time, episodes_conv, max_q = self.run_qlearning_experiment(env, config)
+            ql_path, ql_time, episodes_conv, max_q, conv_stability, expl_efficiency, ql_memory, ql_optimality, ql_smoothness = self.run_qlearning_experiment(env, config)
             ql_result = ExperimentResult(
                 config_id=config_id,
                 algorithm="qlearning",
@@ -385,10 +604,15 @@ class ExperimentRunner:
                 path_length=len(ql_path) if ql_path else 0,
                 success=ql_path is not None and ql_path[-1] == (env["goal"]["x"], env["goal"]["y"]),
                 episodes_to_converge=episodes_conv,
-                final_q_max=max_q
+                final_q_max=max_q,
+                convergence_stability=conv_stability,
+                exploration_efficiency=expl_efficiency,
+                memory_usage=ql_memory,
+                path_optimality=ql_optimality,
+                path_smoothness=ql_smoothness
             )
             results.append(ql_result)
-            print(f"  Q-Learning completed: {len(ql_path) if ql_path else 0} steps, {ql_time:.3f}s")
+            print(f"  Q-Learning completed: {len(ql_path) if ql_path else 0} steps, {ql_time:.3f}s, {ql_memory:.2f}MB, convergence: {episodes_conv} eps")
         except Exception as e:
             print(f"  Q-Learning failed: {e}")
         

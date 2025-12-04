@@ -10,8 +10,8 @@ Ejecuciones Q-Learning: 216
 
 TASAS DE ÉXITO
 ----------------------------------------
-A*: 216/216 (100.0%)
-Q-Learning: 216/216 (100.0%)
+A*: 215/216 (99.5%)
+Q-Learning: 215/216 (99.5%)
 
 RENDIMIENTO POR DENSIDAD DE OBSTÁCULOS
 ----------------------------------------
@@ -19,44 +19,44 @@ RENDIMIENTO POR DENSIDAD DE OBSTÁCULOS
 Densidad 0.0:
   Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
   Longitud Promedio - A*: 6.6, Q-Learning: 6.7
-  Diferencia de Pasos: +0.2 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.053s
+  Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.126s
 
 Densidad 0.1:
   Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 6.9, Q-Learning: 7.0
+  Longitud Promedio - A*: 6.8, Q-Learning: 6.9
   Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.054s
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.123s
 
 Densidad 0.2:
   Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 7.3, Q-Learning: 7.3
-  Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.055s
+  Longitud Promedio - A*: 7.1, Q-Learning: 7.2
+  Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.122s
 
 Densidad 0.3:
-  Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 7.9, Q-Learning: 7.9
-  Diferencia de Pasos: -0.0 pasos (Q-Learning vs A*)
-  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.070s
+  Tasa de Éxito - A*: 98.1%, Q-Learning: 98.1%
+  Longitud Promedio - A*: 7.4, Q-Learning: 7.5
+  Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
+  Tiempo Promedio - A*: 0.000s, Q-Learning: 0.140s
 
 RENDIMIENTO POR DISTANCIA INICIO-META
 ----------------------------------------
 
 Distancia Cercana:
   Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 3.2, Q-Learning: 3.2
+  Longitud Promedio - A*: 3.1, Q-Learning: 3.1
   Diferencia de Pasos: +0.0 pasos (Q-Learning vs A*)
 
 Distancia Media:
   Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 7.4, Q-Learning: 7.5
+  Longitud Promedio - A*: 7.2, Q-Learning: 7.3
   Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
 
 Distancia Lejana:
-  Tasa de Éxito - A*: 100.0%, Q-Learning: 100.0%
-  Longitud Promedio - A*: 10.8, Q-Learning: 11.0
-  Diferencia de Pasos: +0.1 pasos (Q-Learning vs A*)
+  Tasa de Éxito - A*: 98.6%, Q-Learning: 98.6%
+  Longitud Promedio - A*: 10.6, Q-Learning: 10.8
+  Diferencia de Pasos: +0.2 pasos (Q-Learning vs A*)
 
 RENDIMIENTO POR TASA DE APRENDIZAJE (alpha)
 ----------------------------------------
@@ -64,24 +64,24 @@ RENDIMIENTO POR TASA DE APRENDIZAJE (alpha)
 alpha = 0.1:
   Tasa de Éxito Q-Learning: 100.0%
   Longitud Promedio Q-Learning: 7.1
-  Tiempo Promedio Q-Learning: 0.059s
+  Tiempo Promedio Q-Learning: 0.123s
 
 alpha = 0.3:
-  Tasa de Éxito Q-Learning: 100.0%
-  Longitud Promedio Q-Learning: 7.3
-  Tiempo Promedio Q-Learning: 0.057s
+  Tasa de Éxito Q-Learning: 99.1%
+  Longitud Promedio Q-Learning: 7.0
+  Tiempo Promedio Q-Learning: 0.132s
 
 HALLAZGOS PRINCIPALES
 ----------------------------------------
 Mejor rendimiento Q-Learning:
   Configuración: d0.0_distclose_a0.1_g0.9_rbasic
   Longitud del camino: 3 pasos
-  Tiempo: 0.017s
+  Tiempo: 0.103s
 
 Peor rendimiento Q-Learning:
-  Configuración: d0.3_distfar_a0.3_g0.95_rbasic
+  Configuración: d0.3_distfar_a0.1_g0.9_rbasic
   Longitud del camino: 14 pasos
-  Tiempo: 0.105s
+  Tiempo: 0.185s
 
 RECOMENDACIONES
 ----------------------------------------
