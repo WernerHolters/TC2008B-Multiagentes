@@ -95,10 +95,10 @@ class ExtendedExperimentAnalyzer:
             report.append(f"  Reactivo promedio: {reactive_avg_time:.4f} segundos")
             report.append(f"  A* promedio: {astar_avg_time:.4f} segundos")
             report.append(f"  Q-Learning promedio: {ql_avg_time:.4f} segundos")
-            report.append(f"  Ranking velocidad: ", end="")
             times = [("Reactivo", reactive_avg_time), ("A*", astar_avg_time), ("Q-Learning", ql_avg_time)]
             times_sorted = sorted(times, key=lambda x: x[1])
-            report.append(" > ".join([f"{name} ({time:.4f}s)" for name, time in times_sorted]))
+            ranking_str = " > ".join([f"{name} ({time:.4f}s)" for name, time in times_sorted])
+            report.append(f"  Ranking velocidad: {ranking_str}")
         
         # Memory usage
         astar_with_memory = [r for r in successful_astar if r.get('memory_usage') is not None]

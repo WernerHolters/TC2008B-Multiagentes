@@ -1,55 +1,60 @@
 ================================================================================
-ANÁLISIS EXPERIMENTAL COMPLETO: A* vs Q-LEARNING
-Comparación de Rendimiento, Eficiencia y Convergencia
+ANÁLISIS EXPERIMENTAL COMPLETO: Reactivo vs A* vs Q-LEARNING
+Comparación de Paradigmas de Agentes Inteligentes
 ================================================================================
 
 1. RESUMEN DEL EXPERIMENTO
 --------------------------------------------------------------------------------
-Total de experimentos ejecutados: 432
+Total de experimentos ejecutados: 648
+  - Experimentos Agente Reactivo: 216
   - Experimentos A*: 216
   - Experimentos Q-Learning: 216
 
 2. TASAS DE ÉXITO
 --------------------------------------------------------------------------------
-A*: 215/216 (99.5%)
-Q-Learning: 215/216 (99.5%)
+Reactivo: 212/216 (98.1%)
+A*: 216/216 (100.0%)
+Q-Learning: 216/216 (100.0%)
 
 3. MÉTRICAS DE RENDIMIENTO (Solo Ejecuciones Exitosas)
 --------------------------------------------------------------------------------
 
 3.1 Longitud del Camino
-  A* promedio: 6.96 pasos
-  Q-Learning promedio: 7.06 pasos
-  Diferencia: +0.10 pasos (+1.4%)
+  Reactivo promedio: 11.11 pasos
+  A* promedio: 7.10 pasos
+  Q-Learning promedio: 7.19 pasos
+  Diferencia Reactivo vs A*: +4.01 pasos
+  Diferencia Q-Learning vs A*: +0.09 pasos
 
 3.2 Tiempo de Ejecución
-  A* promedio: 0.0000 segundos
-  Q-Learning promedio: 0.1231 segundos
-  Factor de velocidad: Q-Learning es 4319.6x más lento
+  Reactivo promedio: 0.0000 segundos
+  A* promedio: 0.0001 segundos
+  Q-Learning promedio: 0.1535 segundos
+  Ranking velocidad: Reactivo (0.0000s) > A* (0.0001s) > Q-Learning (0.1535s)
 
 3.3 Uso de Memoria
-  A* promedio: 0.00 MB
+  A* promedio: -0.00 MB
   Q-Learning promedio: 0.00 MB
-  Diferencia: +0.00 MB
-  Eficiencia relativa: A* usa 0.07x la memoria de Q-Learning
+  Diferencia: +0.01 MB
+  Eficiencia relativa: A* usa -1.04x la memoria de Q-Learning
 
 3.4 Optimalidad del Camino (1.0 = óptimo)
   A* promedio: 1.000
-  Q-Learning promedio: 0.990
-  Diferencia: -0.010
-  Q-Learning alcanza 99.0% de la optimalidad de A*
+  Q-Learning promedio: 0.991
+  Diferencia: -0.009
+  Q-Learning alcanza 99.1% de la optimalidad de A*
 
 3.5 Suavidad del Camino (1.0 = sin cambios de dirección)
-  A* promedio: 0.800
-  Q-Learning promedio: 0.786
-  Diferencia: -0.014
+  A* promedio: 0.767
+  Q-Learning promedio: 0.767
+  Diferencia: +0.000
 
 4. MÉTRICAS ESPECÍFICAS DE Q-LEARNING
 --------------------------------------------------------------------------------
 
 4.1 Convergencia del Aprendizaje
-  Episodios promedio para convergencia: 1929.7
-  Rango: 1370 - 2000 episodios
+  Episodios promedio para convergencia: 1923.9
+  Rango: 1183 - 2000 episodios
   Estabilidad de convergencia: 1.000
   Eficiencia de exploración: 0.997 (99.7% episodios exitosos)
   Valor Q máximo promedio: 10.00
@@ -64,42 +69,42 @@ Densidad 0.0 (0% de obstáculos):
     Tiempo promedio: 0.0000s
   Q-Learning:
     Tasa de éxito: 54/54 (100.0%)
-    Longitud promedio: 6.70 pasos
-    Tiempo promedio: 0.1256s
-    Convergencia promedio: 1915.2 episodios
+    Longitud promedio: 6.67 pasos
+    Tiempo promedio: 0.1505s
+    Convergencia promedio: 1889.6 episodios
 
 Densidad 0.1 (10% de obstáculos):
   A*:
     Tasa de éxito: 54/54 (100.0%)
-    Longitud promedio: 6.81 pasos
-    Tiempo promedio: 0.0001s
+    Longitud promedio: 6.96 pasos
+    Tiempo promedio: 0.0003s
   Q-Learning:
     Tasa de éxito: 54/54 (100.0%)
-    Longitud promedio: 6.91 pasos
-    Tiempo promedio: 0.1228s
-    Convergencia promedio: 1922.9 episodios
+    Longitud promedio: 7.04 pasos
+    Tiempo promedio: 0.1863s
+    Convergencia promedio: 1947.8 episodios
 
 Densidad 0.2 (20% de obstáculos):
   A*:
     Tasa de éxito: 54/54 (100.0%)
-    Longitud promedio: 7.09 pasos
-    Tiempo promedio: 0.0000s
+    Longitud promedio: 7.17 pasos
+    Tiempo promedio: 0.0001s
   Q-Learning:
     Tasa de éxito: 54/54 (100.0%)
-    Longitud promedio: 7.19 pasos
-    Tiempo promedio: 0.1216s
-    Convergencia promedio: 1942.5 episodios
+    Longitud promedio: 7.28 pasos
+    Tiempo promedio: 0.1430s
+    Convergencia promedio: 1928.7 episodios
 
 Densidad 0.3 (30% de obstáculos):
   A*:
-    Tasa de éxito: 53/54 (98.1%)
-    Longitud promedio: 7.40 pasos
-    Tiempo promedio: 0.0000s
+    Tasa de éxito: 54/54 (100.0%)
+    Longitud promedio: 7.70 pasos
+    Tiempo promedio: 0.0002s
   Q-Learning:
-    Tasa de éxito: 53/54 (98.1%)
-    Longitud promedio: 7.45 pasos
-    Tiempo promedio: 0.1222s
-    Convergencia promedio: 1938.3 episodios
+    Tasa de éxito: 54/54 (100.0%)
+    Longitud promedio: 7.78 pasos
+    Tiempo promedio: 0.1344s
+    Convergencia promedio: 1929.6 episodios
 
 6. ANÁLISIS POR CATEGORÍA DE DISTANCIA
 --------------------------------------------------------------------------------
@@ -107,17 +112,17 @@ Densidad 0.3 (30% de obstáculos):
 Distancia Corta:
   A* - Éxitos: 72/72 (100.0%)
   Q-Learning - Éxitos: 72/72 (100.0%)
-  Longitud promedio - A*: 3.12, Q-Learning: 3.12
+  Longitud promedio - A*: 3.14, Q-Learning: 3.15
 
 Distancia Media:
   A* - Éxitos: 72/72 (100.0%)
   Q-Learning - Éxitos: 72/72 (100.0%)
-  Longitud promedio - A*: 7.18, Q-Learning: 7.32
+  Longitud promedio - A*: 7.32, Q-Learning: 7.39
 
 Distancia Larga:
-  A* - Éxitos: 71/72 (98.6%)
-  Q-Learning - Éxitos: 71/72 (98.6%)
-  Longitud promedio - A*: 10.63, Q-Learning: 10.79
+  A* - Éxitos: 72/72 (100.0%)
+  Q-Learning - Éxitos: 72/72 (100.0%)
+  Longitud promedio - A*: 10.83, Q-Learning: 11.03
 
 7. CONCLUSIONES Y RECOMENDACIONES
 ================================================================================
@@ -128,7 +133,7 @@ Distancia Larga:
   alcanzando resultados casi óptimos después del entrenamiento.
 
 • VELOCIDAD: A* es significativamente más rápido que Q-Learning.
-  Factor: 4319.6x más lento (incluye entrenamiento)
+  Factor: 1117.1x más lento (incluye entrenamiento)
 
 • CONFIABILIDAD: Ambos algoritmos muestran tasas de éxito similares,
   demostrando robustez en diferentes configuraciones de entorno.
